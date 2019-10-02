@@ -82,7 +82,7 @@ import pandas as pd
 X = miv_X.values.reshape(-1,1)
 y = miv_y
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=100)# Treinando modelo
-model  = RandomForestClassifier()
+model  = RandomForestRegression()
 model.fit(X_train, y_train)# Mostrando importância de cada feature
 model.feature_importances_
 
