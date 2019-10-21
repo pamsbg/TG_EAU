@@ -35,6 +35,7 @@ from sklearn.inspection import partial_dependence
 from sklearn.inspection import plot_partial_dependence
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
+import scipy.sparse as sparse
 
 
 matriz_indices_vazoes = pd.read_csv('C:\\Users\\pamsb\\OneDrive\\Documentos\\TG Python\\Matriz_vazao_regress.csv', sep=';')
@@ -44,6 +45,7 @@ matriz_indices_vazoes.head()
 
 
 df = pd.DataFrame(matriz_indices_vazoes, columns = ['Ano','Mes', 'vazao'])
+
 
 # Get column names first
 
@@ -82,40 +84,55 @@ g.set_title('Time series of standardized Vazão in validation set')
 g.set_xlabel('Index')
 g.set_ylabel('Standardized Vazão readings')
 
+df_train=df_train.values
+df_val=df_val.values
 
+def create_dataset(dataset, look_back=1):
+    dataX, dataY = [], []
+    for i in range(len(dataset)-look_back-1):
+        a = dataset[i:(i+look_back), i:(i+look_back)]
+        dataX.append(a)
+        dataY.append(dataset[ i + look_back, i + look_back])
+    return np.array(dataX), np.array(dataY)
+# reshape into X=t and Y=t+1
+look_back = 1
+X_train, y_train = create_dataset(df_train, look_back)
+X_val, y_val = create_dataset(df_val, look_back)
 
+#arr = np.ones(X_train.shape)
+#X_train_novo=np.vstack((arr, X_train))
 
-def makeXy(ts, nb_timesteps):
-    """
-    Input: 
-           ts: original time series
-           nb_timesteps: number of time steps in the regressors
-    Output: 
-           X: 2-D array of regressors
-           y: 1-D array of target 
-    """
-    X = []
-    y = []
-    for i in range(nb_timesteps, ts.shape[0]):
-        X.append(list(ts.loc[i-nb_timesteps:i-1]))
-        y.append(ts.loc[i])
-    X, y = np.array(X), np.array(y)
-    return X, y
+#def makeXy(ts, nb_timesteps):
+#    """
+#    Input: 
+#           ts: original time series
+#           nb_timesteps: number of time steps in the regressors
+#    Output: 
+#           X: 2-D array of regressors
+#           y: 1-D array of target 
+#    """
+#    X = []
+#    y = []
+#    for i in range(nb_timesteps, ts.shape[0]):
+#        X.append(list(ts.loc[i-nb_timesteps:i-1]))
+#        y.append(ts.loc[i])
+#    X, y = np.array(X), np.array(y)
+#    return X, y
 
 #X_train, y_train = makeXy(df_train['scaled_Vazao'],1)
 #print('Shape of train arrays:', X_train.shape, y_train.shape)
 #
 #
 #X_val, y_val = makeXy(df_val['scaled_Vazao'],1)
-X_train = df_train['scaled_Vazao'].shift(4, fill_value=0)
-X_train=np.array(X_train)
-y_train = df_train['scaled_Vazao']
-y_train=np.array(y_train)
+#X_train = df_train['scaled_Vazao'].shift(4, fill_value=0)
+#X_train=np.array(X_train)
+#y_train = df_train['scaled_Vazao']
+#y_train=np.array(y_train)
 print('Shape of train arrays:', X_train.shape, y_train.shape)
-X_val = df_val['scaled_Vazao'].shift(4, fill_value=0)
-X_val=np.array(X_val)
-y_val = df_val['scaled_Vazao']
-y_val=np.array(y_val)
+#X_val = df_val['scaled_Vazao'].shift(4, fill_value=0)
+#X_val=np.array(X_val)
+#y_val = df_val['scaled_Vazao']
+#y_val=np.array(y_val)
 print('Shape of validation arrays:', X_val.shape, y_val.shape)
 from sklearn.preprocessing import StandardScaler
 scaler_x_train = StandardScaler()
